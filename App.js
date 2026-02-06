@@ -1,54 +1,43 @@
-import questionsRaw from "./assets/40Questions.json";
-
 import React, { useState } from "react";
-import questionsRaw from "./assets/40Questions.json";
+import HomeScreen from "./screens/HomeScreen";
+import NewGameScreen from "./screens/NewGameScreen";
+import TutorialScreen from "./screens/TutorialScreen";
+import GameScreen from "./screens/GameScreen";
 
 export default function App() {
-  const [answers, setAnswers] = useState({});
+  const [screen, setScreen] = useState("home"); // home | new | tutorial | game
+  const [gameConfig, setGameConfig] = useState(null);
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
-      <h1>Quiz</h1>
+    <>
+      {screen === "home" && (
+        <HomeScreen
+          onNewGame={() => setScreen("new")}
+          onTutorial={() => setScreen("tutorial")}
+        />
+      )}
 
-      {questionsRaw.map((q, qIndex) => (
-        <div
-          key={qIndex}
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: 10,
-            padding: 15,
-            marginBottom: 15,
+      {screen === "new" && (
+        <NewGameScreen
+          onBack={() => setScreen("home")}
+          onStart={(config) => {
+            setGameConfig(config);
+            setScreen("game");
           }}
-        >
-          <h3>
-            {qIndex + 1}. {q.question}
-          </h3>
+        />
+      )}
 
-          {q.options.map((option, optIndex) => (
-            <label key={optIndex} style={{ display: "block", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name={`question-${qIndex}`}
-                checked={answers[qIndex] === optIndex}
-                onChange={() =>
-                  setAnswers((prev) => ({
-                    ...prev,
-                    [qIndex]: optIndex,
-                  }))
-                }
-              />
-              {" "}{option}
-            </label>
-          ))}
+      {screen === "tutorial" && <TutorialScreen onBack={() => setScreen("home")} />}
 
-          {/* Optional correctness check */}
-          {answers[qIndex] !== undefined && (
-            <p style={{ fontWeight: "bold" }}>
-              {answers[qIndex] === q.answer ? "✅ Correct" : "❌ Incorrect"}
-            </p>
-          )}
-        </div>
-      ))}
-    </div>
+      {screen === "game" && (
+        <GameScreen
+          config={gameConfig}
+          onQuitToHome={() => {
+            setGameConfig(null);
+            setScreen("home");
+          }}
+        />
+      )}
+    </>
   );
 }
